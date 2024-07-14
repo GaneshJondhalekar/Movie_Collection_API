@@ -9,18 +9,11 @@ class RegisterSerializer(serializers.Serializer):
     username=serializers.CharField()
     password=serializers.CharField()
 
-    def validate(self, data):
-        
-        if User.objects.filter(username=data.get('username')).exists():
-            raise serializers.ValidationError('Username is taken If u are already registered then go to login')
-        
-        return data
-
-
     def create(self, validated_data):
-       
-        user=User.objects.create(username=validated_data['username'].lower(),
-                                )
+        if User.objects.filter(username=validated_data.get('username')).exists():
+            #print("Already user exist")
+            return validated_data
+        user=User.objects.create(username=validated_data['username'].lower())
         user.set_password(validated_data['password'])
         user.save()
         #print("created..................")
@@ -37,26 +30,6 @@ class RegisterSerializer(serializers.Serializer):
         #print('No isuue........')
         return {'access_token':{'access':str(access)}}
 
-class LoginSerializer(serializers.Serializer):
-    username=serializers.CharField()
-    password=serializers.CharField()
-
-    def validate(self,data):
-        if not User.objects.filter(username=data['username']).exists():
-            raise serializers.ValidationError("Username not found")
-        return data
-    
-    
-    def get_jwt_token(self,data):
-        #print("Token.............")
-        user=authenticate(username=data['username'],password=data['password'])
-        if user is None:
-            return {'data':{},'message':"Invalid credentials"}
-        
-        refresh=RefreshToken.for_user(user)
-        access=refresh.access_token
-        #print('No isuue........')
-        return {'access_token':{'access':str(access)}}
     
 
 class MovieSerializer(serializers.ModelSerializer):
