@@ -67,7 +67,7 @@ class MovieListView(APIView):
         password = os.getenv('MOVIE_API_PASSWORD')
         #With username and password api is not working so i tried without username and password. It is working well
         response = requests.get('https://demo.credy.in/api/v1/maya/movies/',verify=False)
-        print(response.status_code)
+        #print(response.status_code)
         response.raise_for_status()
         return response.json()
 

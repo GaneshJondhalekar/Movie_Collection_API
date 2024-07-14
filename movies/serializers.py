@@ -23,18 +23,18 @@ class RegisterSerializer(serializers.Serializer):
                                 )
         user.set_password(validated_data['password'])
         user.save()
-        print("created..................")
+        #print("created..................")
         return validated_data
 
     def get_jwt_token(self,data):
-        print("Token.............")
+        #print("Token.............")
         user=authenticate(username=data['username'],password=data['password'])
         if user is None:
             return {'data':{},'message':"Invalid credentials"}
         
         refresh=RefreshToken.for_user(user)
         access=refresh.access_token
-        print('No isuue........')
+        #print('No isuue........')
         return {'access_token':{'access':str(access)}}
 
 class LoginSerializer(serializers.Serializer):
@@ -48,14 +48,14 @@ class LoginSerializer(serializers.Serializer):
     
     
     def get_jwt_token(self,data):
-        print("Token.............")
+        #print("Token.............")
         user=authenticate(username=data['username'],password=data['password'])
         if user is None:
             return {'data':{},'message':"Invalid credentials"}
         
         refresh=RefreshToken.for_user(user)
         access=refresh.access_token
-        print('No isuue........')
+        #print('No isuue........')
         return {'access_token':{'access':str(access)}}
     
 
@@ -73,9 +73,9 @@ class CollectionCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         movies_data = validated_data.pop('movies')
-        print("################..",movies_data)
+        #print("################..",movies_data)
         collection = Collection.objects.create(**validated_data)
-        print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+        #print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
         for movie_data in movies_data:
             movie, _ = Movie.objects.get_or_create(**movie_data)
             collection.movies.add(movie)
