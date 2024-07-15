@@ -47,7 +47,6 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        # other authentication classes...
     ],
 }
 
@@ -63,8 +62,8 @@ MIDDLEWARE = [
 ]
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),  # Set to 12 hours or as needed
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Set to 7 days or as needed
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),  
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  
 }
 
 ROOT_URLCONF = 'movie_collection.urls'
