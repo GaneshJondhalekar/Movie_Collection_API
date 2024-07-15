@@ -4,9 +4,11 @@ from .models import RequestCount
 
 class RequestCounterMiddleware:
     def __init__(self, get_response):
+        #print('request')
         self.get_response = get_response
 
     def __call__(self, request):
+        #print('response')
         self.increment_request_count()
         response = self.get_response(request)
         return response

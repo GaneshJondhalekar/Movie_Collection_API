@@ -6,9 +6,9 @@ from rest_framework.permissions import IsAuthenticated
 from tenacity import retry, stop_after_attempt, wait_exponential
 from .serializers import *
 import os
+from dotenv import load_dotenv
 import requests
 from collections import Counter
-import itertools
 from .models import RequestCount
 
 class RegisterView(APIView):
@@ -40,10 +40,12 @@ class MovieListView(APIView):
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=6))
     def fetch_movies(self):
         #print('..........................................')
+        load_dotenv()
         username = os.getenv('MOVIE_API_USERNAME')
         password = os.getenv('MOVIE_API_PASSWORD')
-        #With username and password api is not working so i tried without username and password. It is working well
-        response = requests.get('https://demo.credy.in/api/v1/maya/movies/',verify=False)
+        #print('..........',username,password)
+        #without passing username and password also it is working 
+        response = requests.get('https://demo.credy.in/api/v1/maya/movies/',auth=(username, password),verify=False)
         #print(response.status_code)
         response.raise_for_status()
         return response.json()
@@ -51,7 +53,7 @@ class MovieListView(APIView):
     def get(self, request):
         try:
             data = self.fetch_movies()
-            return Response(data)
+            return Response(data,status=status.HTTP_200_OK)
         except requests.exceptions.HTTPError as e:
             return Response({'error':'Unauthorized access'}, status=status.HTTP_401_UNAUTHORIZED)
         except requests.RequestException as e:
