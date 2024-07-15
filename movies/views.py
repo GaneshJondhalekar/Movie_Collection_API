@@ -28,7 +28,7 @@ class RegisterView(APIView):
                 'message': "Something went wrong"
             }, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print(e)
+            #print(e)
             return Response({
                 'data': {},
                 'message': "Something went wrong here"
@@ -60,71 +60,106 @@ class MovieListView(APIView):
 class CollectionAPIView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
-        data=request.data
-        data['user']=request.user.id
-        serializer = CollectionCreateSerializer(data=data)
-        #print(request.data,'.......',data)
-        if serializer.is_valid():
-            collection=serializer.save()
-            return Response({'collection_uuid':collection.uuid} , status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            data=request.data
+            data['user']=request.user.id
+            serializer = CollectionCreateSerializer(data=data)
+            #print(request.data,'.......',data)
+            if serializer.is_valid():
+                collection=serializer.save()
+                return Response({'collection_uuid':collection.uuid} , status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            #print(e)
+            return Response({
+                'data': {},
+                'message': "Something went wrong here"
+            }, status=status.HTTP_400_BAD_REQUEST)
     
     def get(self,request,*args,**kwargs):
-        user=request.user
-        my_collections=Collection.objects.prefetch_related('movies').filter(user=user)
-        serializer=RetriveCollectionSerializer(my_collections,many=True)
-       
-        all_genres=[]
-        for collection in my_collections:
-            for movie in collection.movies.all():
-                genres = movie.genres.split(',')
-                all_genres.extend(genres)
-        #print(all_genres,'........###')     
-        genre_counter = Counter(all_genres)
-        #print(genre_counter,'........###') 
+        try:
+            user=request.user
+            my_collections=Collection.objects.prefetch_related('movies').filter(user=user)
+            serializer=RetriveCollectionSerializer(my_collections,many=True)
         
-        top_genres = [genre for genre, _ in genre_counter.most_common(3)]
-        all_top_genres= ",".join(top_genres)
+            all_genres=[]
+            for collection in my_collections:
+                for movie in collection.movies.all():
+                    genres = movie.genres.split(',')
+                    all_genres.extend(genres)
+            #print(all_genres,'........###')     
+            genre_counter = Counter(all_genres)
+            #print(genre_counter,'........###') 
+            
+            top_genres = [genre for genre, _ in genre_counter.most_common(3)]
+            all_top_genres= ",".join(top_genres)
 
-        data = {
-            "is_success": True,
-            "data": {
-                "collections": serializer.data,
-                "favourite_genres": all_top_genres
+            data = {
+                "is_success": True,
+                "data": {
+                    "collections": serializer.data,
+                    "favourite_genres": all_top_genres
+                }
             }
-        }
-        
-        return Response(data, status=status.HTTP_200_OK)
+            
+            return Response(data, status=status.HTTP_200_OK)
+        except Exception as e:
+            #print(e)
+            return Response({
+                'data': {},
+                'message': "Something went wrong here"
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class DetailCollectionAPIView(APIView):
     permission_classes = [IsAuthenticated]
     def put(self, request, uuid, *args, **kwargs):
-        collection = Collection.objects.prefetch_related('movies').filter(uuid=uuid).first()
-        if not collection:
-            return Response({'error': 'Collection not found'}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            collection = Collection.objects.prefetch_related('movies').filter(uuid=uuid,user=request.user).first()
+            if not collection:
+                return Response({'error': 'Collection not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = UpdateCollectionSerializer(collection, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'message':'Successfully collection updated','data':serializer.data}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer = UpdateCollectionSerializer(collection, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'message':'Successfully collection updated','data':serializer.data}, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            #print(e)
+            return Response({
+                'data': {},
+                'message': "Something went wrong here"
+            }, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, uuid, *args, **kwargs):
-        collection = Collection.objects.filter(uuid=uuid).first()
-        if not collection:
-            return Response({'error': 'Collection not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-        serializer = UpdateCollectionSerializer(collection)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        try:
+            collection = Collection.objects.filter(uuid=uuid,user=request.user).first()
+            if not collection:
+                return Response({'error': 'Collection not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+            serializer = GetCollectionSerializer(collection)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            #print(e)
+            return Response({
+                'data': {},
+                'message': "Something went wrong here"
+            }, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request, uuid, *args, **kwargs):
-        collection = Collection.objects.filter(uuid=uuid).first()
-        if not collection:
-            return Response({'error': 'Collection not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-        collection.delete()
-        return Response({'message': 'Collection deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        try:
+            collection = Collection.objects.filter(uuid=uuid,user=request.user).first()
+            if not collection:
+                return Response({'error': 'Collection not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+            collection.delete()
+            return Response({'message': 'Collection deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            #print(e)
+            return Response({
+                'data': {},
+                'message': "Something went wrong here"
+            }, status=status.HTTP_400_BAD_REQUEST)
     
 class RequestCountAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -138,5 +173,12 @@ class RequestCountAPIView(APIView):
 class ResetRequestCountAPIView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
-        RequestCount.objects.update_or_create(id=1, defaults={'count': 0})
-        return Response({"message": "request count reset successfully"}, status=status.HTTP_200_OK)
+        try:
+            RequestCount.objects.update_or_create(id=1, defaults={'count': 0})
+            return Response({"message": "request count reset successfully"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            #print(e)
+            return Response({
+                'data': {},
+                'message': "Something went wrong here"
+            }, status=status.HTTP_400_BAD_REQUEST)

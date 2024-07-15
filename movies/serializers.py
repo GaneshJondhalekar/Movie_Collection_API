@@ -28,7 +28,7 @@ class RegisterSerializer(serializers.Serializer):
         refresh=RefreshToken.for_user(user)
         access=refresh.access_token
         #print('No isuue........')
-        return {'access_token':{'access':str(access)}}
+        return {'access_token':str(access)}
 
     
 
@@ -85,3 +85,10 @@ class UpdateCollectionSerializer(serializers.ModelSerializer):
                 instance.movies.add(movie)
 
         return instance
+
+class GetCollectionSerializer(serializers.ModelSerializer):
+    movies = MovieSerializer(many=True)
+
+    class Meta:
+        model = Collection
+        fields = ['title', 'description', 'movies']
